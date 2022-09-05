@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
-public abstract class Packet<T> {
+public abstract class Packet {
 
     @Getter
-    private final Class<T> type;
+    private final Class<?> type;
 
 }
