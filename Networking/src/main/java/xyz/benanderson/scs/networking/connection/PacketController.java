@@ -99,10 +99,10 @@ class PacketController implements AutoCloseable {
      * Method overriding the default `close()` implementation from {@link AutoCloseable}.
      * This method closes the input and output streams of the Socket.
      *
-     * @throws Exception thrown if an exception occurs when closing the I/O streams.
+     * @throws IOException thrown if an exception occurs when closing the I/O streams.
      */
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
         //close object input & output streams - will also close the underlying
         //abstract InputStream & OutputStream on the Socket.
         objectInputStream.close();
