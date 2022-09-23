@@ -7,6 +7,13 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+/**
+ * The {@code PacketSender} class exposes a high-level API to developers,
+ * allowing them to create callbacks for received packets from the parent {@code Connection}.
+ * This class internally uses a map to correlate packet types to a list of packet callbacks
+ * for that type. These packet callbacks are executed asynchronously from packet listening
+ * thread and therefore should not block the flow of execution with blocking callouts.
+ */
 public class PacketListener implements AutoCloseable {
 
     //encapsulated map data structure storing a list of callback code blocks to run for each
@@ -62,6 +69,13 @@ public class PacketListener implements AutoCloseable {
         this.packetListeningThread.start();
     }
 
+    /**
+     * Method to add a callback to the parent connection. The callback will be run when a packet
+     * is received with the correct type for that callback.
+     *
+     * @param packetClass type of the packet that the callback will be triggered by
+     * @param callback the code to run with the packet
+     */
     public <T extends Packet> void addCallback(Class<T> packetClass, Consumer<T> callback) {
         //if a callback of the packet class type has not already been registered,
         //then add it to the map with a new, empty linked list.
@@ -73,8 +87,17 @@ public class PacketListener implements AutoCloseable {
         callbacks.get(packetClass).add((Consumer<Packet>) callback);
     }
 
+    /**
+     * Method with private visibility to run all callbacks associated with the type
+     * of the packet provided.
+     *
+     * @param packet packet to run callbacks on
+     */
     private void runCallbacks(Packet packet) {
+        //check if any callbacks are registered for the packet type
         if (callbacks.containsKey(packet.getType()))
+            //if callbacks are registered run all callbacks for the packet type
+            //using the packet as the argument
             callbacks.get(packet.getType()).forEach(callback -> callback.accept(packet));
     }
 
