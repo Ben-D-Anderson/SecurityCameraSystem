@@ -7,6 +7,6 @@ import lombok.Getter;
 public abstract class Packet {
 
     @Getter
-    private final Class<?> type;
+    private final Class<? extends Packet> type;
 
 }
