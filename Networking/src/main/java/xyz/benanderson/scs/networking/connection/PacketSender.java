@@ -38,7 +38,7 @@ public class PacketSender implements AutoCloseable {
         //create thread
         this.packetSendingThread = new Thread(() -> {
             //code to run in the thread
-            while (sendingPackets.get()) {
+            while (sendingPackets.get() && connection.isConnected()) {
                 //using peek instead of poll so that if a packet failed to send
                 //it can be tried again
                 Packet packetToSend = packetQueue.peek();
@@ -53,6 +53,10 @@ public class PacketSender implements AutoCloseable {
                     //remove it from the queue of packets to send
                     packetQueue.remove();
                 } catch (IOException e) {
+                    //exception will be thrown if the connection was closed, in which
+                    //case ignore it and return
+                    if (!connection.isConnected()) return;
+
                     //if the packet was NOT successfully sent across the connection,
                     //keep it in the queue of packets to send and instead log the error
                     //to the standard error stream - this results in trying to
