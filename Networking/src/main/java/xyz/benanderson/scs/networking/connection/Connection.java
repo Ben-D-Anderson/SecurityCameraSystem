@@ -60,8 +60,9 @@ public class Connection implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        getPacketSender().close();
         getPacketController().close();
+        getPacketSender().close();
+        getPacketListener().close();
         socket.close();
     }
 
