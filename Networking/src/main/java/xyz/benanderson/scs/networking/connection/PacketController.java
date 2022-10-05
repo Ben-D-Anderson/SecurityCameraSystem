@@ -37,17 +37,17 @@ class PacketController implements AutoCloseable {
      * input or output streams
      */
     public PacketController(Connection connection) throws IOException {
-        //create ObjectInputStream from socket's abstract InputStream
-        this.objectInputStream = new ObjectInputStream(
-                //get InputStream from the Socket in the Connection
-                //and pass it as the argument to the ObjectInputStream constructor
-                connection.getSocket().getInputStream()
-        );
         //create ObjectOutputStream from socket's abstract OutputStream
         this.objectOutputStream = new ObjectOutputStream(
                 //get OutputStream from the Socket in the Connection
                 //and pass it as the argument to the ObjectOutputStream constructor
                 connection.getSocket().getOutputStream()
+        );
+        //create ObjectInputStream from socket's abstract InputStream
+        this.objectInputStream = new ObjectInputStream(
+                //get InputStream from the Socket in the Connection
+                //and pass it as the argument to the ObjectInputStream constructor
+                connection.getSocket().getInputStream()
         );
     }
 

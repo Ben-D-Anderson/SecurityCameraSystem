@@ -19,33 +19,35 @@ import static org.mockito.Mockito.*;
 
 public class PacketControllerTest {
 
-    private PacketController packetController;
-    private Socket connectionSocket, peerSocket;
+    private Connection localConnection, peerConnection;
 
     //method runs before each test method in this class
     @BeforeEach
     void setupPacketController() throws IOException {
+        Socket localSocket, peerSocket;
         //create server on randomly assigned available port
         try (ServerSocket embeddedServer = new ServerSocket(0)) {
             //create socket connections from both sides
-            connectionSocket = new Socket(embeddedServer.getInetAddress(), embeddedServer.getLocalPort());
+            localSocket = new Socket(embeddedServer.getInetAddress(), embeddedServer.getLocalPort());
             peerSocket = embeddedServer.accept();
         }
-        //create a mock Connection object to return connectionSocket when Connection#getSocket is called
-        Connection connection = mock(Connection.class);
-        doReturn(connectionSocket).when(connection).getSocket();
+        //create a mock Connection object to return localSocket when Connection#getSocket is called
+        Connection localConnection = mock(Connection.class);
+        doReturn(localSocket).when(localConnection).getSocket();
+        this.localConnection = localConnection;
 
-        //instantiate PacketController with connection
-        packetController = new PacketController(connection);
+        //create a mock Connection object to return peerSocket when Connection#getSocket is called
+        Connection peerConnection = mock(Connection.class);
+        doReturn(peerSocket).when(peerConnection).getSocket();
+        this.peerConnection = peerConnection;
     }
 
     //method runs after each test method in this class
     @AfterEach
     void destroyPacketController() {
         try {
-            packetController.close();
-            connectionSocket.close();
-            peerSocket.close();
+            localConnection.getSocket().close();
+            peerConnection.getSocket().close();
         } catch (IOException ignored) {}
     }
 
@@ -63,27 +65,40 @@ public class PacketControllerTest {
 
     @Test
     void testWritePacket() throws IOException, ClassNotFoundException {
+        //instantiated to stop the PacketController from hanging
+        ObjectOutputStream peerOutputStream = new ObjectOutputStream(peerConnection.getSocket().getOutputStream());
+        PacketController localPacketController = new PacketController(localConnection);
+
         int testData = new Random().nextInt();
         TestPacket testPacket = new TestPacket(testData);
-        packetController.writePacketToSocket(testPacket);
+        localPacketController.writePacketToSocket(testPacket);
 
         Packet receivedPacket;
-        try (ObjectInputStream peerInputStream = new ObjectInputStream(peerSocket.getInputStream())) {
+        try (ObjectInputStream peerInputStream = new ObjectInputStream(peerConnection.getSocket().getInputStream())) {
             receivedPacket = (Packet) peerInputStream.readObject();
         }
+        peerOutputStream.close();
+        localPacketController.close();
+
+        assertNotNull(receivedPacket);
         assertEquals(testPacket.getType(), receivedPacket.getType());
         assertEquals(testPacket.getTestData(), ((TestPacket) receivedPacket).getTestData());
     }
 
     @Test
     void testReadPacket() throws IOException, ClassNotFoundException {
+        //instantiated to stop the PacketController from hanging
+        ObjectOutputStream peerOutputStream = new ObjectOutputStream(peerConnection.getSocket().getOutputStream());
+        PacketController localPacketController = new PacketController(localConnection);
+
         int testData = new Random().nextInt();
         TestPacket testPacket = new TestPacket(testData);
-        try (ObjectOutputStream peerOutputStream = new ObjectOutputStream(peerSocket.getOutputStream())) {
-            peerOutputStream.writeObject(testPacket);
-        }
+        peerOutputStream.writeObject(testPacket);
 
-        Packet receivedPacket = packetController.readPacketFromSocket();
+        Packet receivedPacket = localPacketController.readPacketFromSocket();
+        peerOutputStream.close();
+        localPacketController.close();
+
         assertEquals(testPacket.getType(), receivedPacket.getType());
         assertEquals(testPacket.getTestData(), ((TestPacket) receivedPacket).getTestData());
     }
