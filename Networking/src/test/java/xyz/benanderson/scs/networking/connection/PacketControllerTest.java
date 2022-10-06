@@ -1,11 +1,10 @@
 package xyz.benanderson.scs.networking.connection;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import xyz.benanderson.scs.networking.Packet;
+import xyz.benanderson.scs.networking.packets.TestPacket;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -49,18 +48,6 @@ public class PacketControllerTest {
             localConnection.getSocket().close();
             peerConnection.getSocket().close();
         } catch (IOException ignored) {}
-    }
-
-    //test packet type only used in testing to confirm
-    //data is correctly transmitted and received
-    static class TestPacket extends Packet {
-        @Getter(AccessLevel.PUBLIC)
-        private final int testData;
-
-        public TestPacket(int testData) {
-            super(TestPacket.class);
-            this.testData = testData;
-        }
     }
 
     @Test
