@@ -68,7 +68,6 @@ public class PacketSenderTest {
         packetSender.sendPacket(testPacket);
 
         TestPacket receivedPacket = (TestPacket) peerObjectInputStream.readObject();
-        doReturn(false).when(localConnectionMock).isConnected();
         try {
             localSocket.close();
             peerSocket.close();
