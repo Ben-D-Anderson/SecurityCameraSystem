@@ -66,6 +66,10 @@ public class PacketSender implements AutoCloseable {
                     e.printStackTrace();
                 }
             }
+            try {
+                if (connection.isConnected())
+                    connection.close();
+            } catch (Exception ignored) {}
         }, "Packet Sending Thread" /* name of the thread */);
 
         //start the asynchronous packet sending thread

@@ -63,6 +63,10 @@ public class PacketListener implements AutoCloseable {
                     e.printStackTrace();
                 }
             }
+            try {
+                if (connection.isConnected())
+                    connection.close();
+            } catch (Exception ignored) {}
         }, "Packet Listening Thread" /* name of the thread */);
 
         //start the asynchronous packet listening thread
