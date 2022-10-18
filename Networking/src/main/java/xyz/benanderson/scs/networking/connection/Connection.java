@@ -2,9 +2,12 @@ package xyz.benanderson.scs.networking.connection;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * Connection interface which provides high level access to the connection between
@@ -26,6 +29,12 @@ public class Connection implements AutoCloseable {
     private final PacketController packetController;
 
     /**
+     * Unique ID attribute to help tell difference between connections
+     */
+    @Getter(AccessLevel.PUBLIC)
+    private final UUID id;
+
+    /**
      * PacketSender attribute with getter
      */
     @Getter(AccessLevel.PUBLIC)
@@ -45,11 +54,16 @@ public class Connection implements AutoCloseable {
      * @throws IOException thrown if an I/O errors when preparing the I/O streams.
      */
     public Connection(Socket socket) throws IOException {
+        this.id = UUID.randomUUID();
         this.socket = socket;
         this.packetController = new PacketController(this);
         this.packetSender = new PacketSender(this);
         this.packetListener = new PacketListener(this);
     }
+
+    @Getter
+    @Setter
+    private Consumer<Connection> disconnectListener;
 
     /**
      * Method to override default implementation in {@link AutoCloseable} interface.
@@ -59,7 +73,8 @@ public class Connection implements AutoCloseable {
      * @throws Exception thrown if an I/O errors when closing the I/O streams or socket.
      */
     @Override
-    public void close() throws Exception {
+    public synchronized void close() throws Exception {
+        getDisconnectListener().accept(this);
         getPacketController().close();
         getPacketSender().close();
         getPacketListener().close();
@@ -71,7 +86,7 @@ public class Connection implements AutoCloseable {
      *
      * @return true if this connection is connected to a peer, false if it isn't.
      */
-    public boolean isConnected() {
+    public synchronized boolean isConnected() {
         return getSocket().isConnected() && !getSocket().isClosed();
     }
 
