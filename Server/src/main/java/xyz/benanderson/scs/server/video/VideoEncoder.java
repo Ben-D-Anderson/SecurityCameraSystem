@@ -15,8 +15,8 @@ public class VideoEncoder {
 
     private final VideoFileManager videoFileManager;
 
-    //todo convert to using imageio to store lots of images in file, then once duration is reached
-    //convert the images file to a video
+    //todo convert to using imageio to store lots of images in file, then once duration is reached, convert the images file to a video
+    //todo will also need to check for any files containing images in the folder when program started in case of previous crash / end before duration
     public void appendToStream(BufferedImage image) throws IOException {
         Optional<Path> currentSaveFileOptional = videoFileManager.getCurrentSaveFile();
         if (currentSaveFileOptional.isEmpty()) {
