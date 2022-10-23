@@ -73,15 +73,19 @@ public class Configuration {
     }
 
     public Optional<Integer> getInt(String key) {
-        AtomicInteger valInt = new AtomicInteger();
-        try {
-            getString(key).ifPresent(val -> valInt.set(Integer.parseInt(val)));
-        } catch (NumberFormatException ignored) {}
-        return Optional.of(valInt.get());
+        return getString(key).map(Integer::parseInt);
     }
 
     public int getRequiredInt(String key) {
         return getInt(key).orElseThrow(() -> new NoSuchElementException("'" + key + "' must be an integer"));
+    }
+
+    public Optional<Double> getDouble(String key) {
+        return getString(key).map(Double::parseDouble);
+    }
+
+    public double getRequiredDouble(String key) {
+        return getDouble(key).orElseThrow(() -> new NoSuchElementException("'" + key + "' must be a double"));
     }
 
     public boolean getBoolean(String key, boolean defaultValue) {
