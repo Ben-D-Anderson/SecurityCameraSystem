@@ -2,6 +2,7 @@ package xyz.benanderson.scs.server.networking;
 
 import lombok.Getter;
 import xyz.benanderson.scs.networking.connection.Connection;
+import xyz.benanderson.scs.server.configuration.ConfigurationWrapper;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -29,7 +30,7 @@ public class Server implements AutoCloseable {
     private final BiConsumer<Connection, Server> clientDisconnectListener;
     private final Consumer<Server> serverShutdownListener;
 
-    public Server(ServerBuilder serverBuilder) {
+    Server(ServerBuilder serverBuilder) {
         this.connections = Collections.synchronizedSortedMap(new TreeMap<>());
         this.running = new AtomicBoolean(true);
         this.port = serverBuilder.getPort();
@@ -44,7 +45,7 @@ public class Server implements AutoCloseable {
     }
 
     /**
-     * @return An unmodifiable SortedMap representing the Connections to the server
+     * @return An unmodifiable SortedMap representing the {@code Connection}(s) to the server
      */
     public SortedMap<UUID, Connection> getConnections() {
         return Collections.unmodifiableSortedMap(connections);
@@ -62,19 +63,21 @@ public class Server implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
+        running.set(false);
+        serverSocket.close();
+        receiveConnectionsThread.join();
         connections.values().forEach(con -> {
             try {
                 con.close();
             } catch (Exception ignored) {}
         });
         connections.clear();
-        running.set(false);
-        serverSocket.close();
-        receiveConnectionsThread.join();
     }
 
     private void receiveConnections() {
         while (running.get() && !serverSocket.isClosed()) {
+            if (connections.size() >= ConfigurationWrapper.getInstance().getMaxConnections())
+                continue;
             try {
                 Socket socket = serverSocket.accept();
                 Connection connection = new Connection(socket);
@@ -86,7 +89,8 @@ public class Server implements AutoCloseable {
                     } catch (Exception ignored) {}
                 };
                 connection.setDisconnectListener(con -> clientDisconnectListener.andThen(closeListener).accept(con, this));
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         serverShutdownListener.accept(this);
