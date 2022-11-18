@@ -1,9 +1,7 @@
 package xyz.benanderson.scs.server.video;
 
 import lombok.AllArgsConstructor;
-import org.jcodec.api.SequenceEncoder;
 import org.jcodec.api.awt.AWTSequenceEncoder;
-import org.jcodec.scale.AWTUtil;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -25,8 +23,6 @@ public class VideoEncoder {
         }
         Path currentSaveFile = currentSaveFileOptional.get();
         AWTSequenceEncoder encoder = AWTSequenceEncoder.createSequenceEncoder(currentSaveFile.toFile(), 30);
-//        SequenceEncoder sequenceEncoder = SequenceEncoder.createSequenceEncoder();
-//        sequenceEncoder.encodeNativeFrame(AWTUtil.fromBufferedImageRGB(image));
         encoder.encodeImage(image);
 //        encoder.finish();
     }
