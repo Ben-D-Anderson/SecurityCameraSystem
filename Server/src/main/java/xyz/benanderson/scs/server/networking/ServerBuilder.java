@@ -3,6 +3,7 @@ package xyz.benanderson.scs.server.networking;
 import lombok.Getter;
 import xyz.benanderson.scs.networking.connection.Connection;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -61,7 +62,7 @@ public class ServerBuilder {
     /**
      * Construct a {@code Server} from this {@code ServerBuilder}
      */
-    public Server build() {
+    public Server build() throws IOException {
         return new Server(this);
     }
 

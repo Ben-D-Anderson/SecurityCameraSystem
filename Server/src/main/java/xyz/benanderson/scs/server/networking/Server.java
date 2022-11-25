@@ -19,12 +19,9 @@ import java.util.function.Consumer;
 public class Server implements AutoCloseable {
 
     //attributes of the server
-    @Getter
-    private ServerSocket serverSocket;
-    private Thread receiveConnectionsThread;
-    @Getter
+    private final ServerSocket serverSocket;
+    private final Thread receiveConnectionsThread;
     private final int port;
-    private final InetAddress bindAddress;
     private final SortedMap<UUID, Connection> connections;
     private final AtomicBoolean running;
     private final BiConsumer<Connection, Server> clientConnectListener;
@@ -37,7 +34,7 @@ public class Server implements AutoCloseable {
      *
      * @param serverBuilder builder to construct this {@code Server} from
      */
-    Server(ServerBuilder serverBuilder) {
+    Server(ServerBuilder serverBuilder) throws IOException {
         //create a synchronized map to avoid race conditions in a multithreaded environment
         //uses a TreeMap as a key-value store for connections, where the key is the
         //Connection's identifier and the value is the Connection object.
@@ -48,7 +45,7 @@ public class Server implements AutoCloseable {
         this.running = new AtomicBoolean(true);
         //assign attributes from serverBuilder...
         this.port = serverBuilder.getPort();
-        this.bindAddress = serverBuilder.getBindAddress();
+        InetAddress bindAddress = serverBuilder.getBindAddress();
         this.clientConnectListener = serverBuilder.getClientConnectListener();
         //append code to remove the Connection from the Server's internal connections map
         //to the end of the client disconnect listener
@@ -57,13 +54,27 @@ public class Server implements AutoCloseable {
         };
         this.clientDisconnectListener = serverBuilder.getClientDisconnectListener().andThen(closeListener);
         this.serverShutdownListener = serverBuilder.getServerShutdownListener();
+
+        this.serverSocket = new ServerSocket(this.port, 5, bindAddress);
+        this.receiveConnectionsThread = new Thread(this::receiveConnections);
+        this.receiveConnectionsThread.start();
+    }
+
+    public int getPort() {
+        return getServerSocket().getLocalPort();
+    }
+
+    public ServerSocket getServerSocket() {
+        synchronized (serverSocket) {
+            return serverSocket;
+        }
     }
 
     /**
      * @return boolean denoting if the {@code Server} is open and running.
      */
     public boolean isOpen() {
-        return serverSocket != null && !serverSocket.isClosed() && running.get();
+        return getServerSocket() != null && !getServerSocket().isClosed() && running.get();
     }
 
     /**
@@ -71,21 +82,6 @@ public class Server implements AutoCloseable {
      */
     public SortedMap<UUID, Connection> getConnections() {
         return Collections.unmodifiableSortedMap(connections);
-    }
-
-    /**
-     * Starts the {@code Server}'s receive-connections thread and opens a {@code ServerSocket}
-     * to allow connections.
-     */
-    public void start() throws IOException {
-        start(new ServerSocket(this.port, 5, this.bindAddress));
-    }
-
-    //private-visibility method used by the public visibility start() method
-    private void start(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
-        this.receiveConnectionsThread = new Thread(this::receiveConnections);
-        this.receiveConnectionsThread.start();
     }
 
     /**
@@ -98,7 +94,7 @@ public class Server implements AutoCloseable {
         //attempt to stop listening for connections on the receive-connections thread
         running.set(false);
         try {
-            serverSocket.close();
+            getServerSocket().close();
         } catch (Exception ignored) {}
         //wait for the receive-connections thread to terminate (also waits for the
         //server shutdown listener to execute).
@@ -125,19 +121,19 @@ public class Server implements AutoCloseable {
                 continue;
             try {
                 //block until connection is accepted from the server's socket
-                Socket socket = serverSocket.accept();
+                Socket socket = getServerSocket().accept();
                 //instantiate Connection object (from connection framework) using
                 //the connection's socket
                 Connection connection = new Connection(socket);
+                //add disconnect listener to the connection
+                connection.setDisconnectListener(con -> clientDisconnectListener.accept(con, this));
                 //add connection to server's map of connections
                 connections.put(connection.getId(), connection);
                 //run the client connection listener with the newly accepted connection
                 clientConnectListener.accept(connection, this);
-                //add disconnect listener to the connection
-                connection.setDisconnectListener(con -> clientDisconnectListener.accept(con, this));
             } catch (IOException e) {
                 //print error if an exception occurs
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
         //run the server shutdown listener as isOpen() now returns false

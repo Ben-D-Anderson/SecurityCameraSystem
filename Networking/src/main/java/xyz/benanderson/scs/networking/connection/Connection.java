@@ -59,6 +59,7 @@ public class Connection implements AutoCloseable {
         this.packetController = new PacketController(this);
         this.packetSender = new PacketSender(this);
         this.packetListener = new PacketListener(this);
+        this.disconnectListener = con -> {};
     }
 
     @Getter
@@ -74,11 +75,11 @@ public class Connection implements AutoCloseable {
      */
     @Override
     public synchronized void close() throws Exception {
+        socket.close();
         getDisconnectListener().accept(this);
         getPacketController().close();
         getPacketSender().close();
         getPacketListener().close();
-        socket.close();
     }
 
     /**
@@ -86,7 +87,7 @@ public class Connection implements AutoCloseable {
      *
      * @return true if this connection is connected to a peer, false if it isn't.
      */
-    public synchronized boolean isConnected() {
+    public boolean isConnected() {
         return getSocket().isConnected() && !getSocket().isClosed();
     }
 

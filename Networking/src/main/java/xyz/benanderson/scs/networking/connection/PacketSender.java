@@ -23,6 +23,8 @@ public class PacketSender implements AutoCloseable {
     //loop in the packet sending thread.
     private final AtomicBoolean sendingPackets = new AtomicBoolean(true);
 
+    private final Connection connection;
+
     /**
      * Constructor for {@code PacketSender} class
      *
@@ -30,6 +32,7 @@ public class PacketSender implements AutoCloseable {
      *                                     sending the packets for.
      */
     public PacketSender(Connection connection) {
+        this.connection = connection;
         //initialise queue attribute with a ConcurrentLinkedQueue object,
         //this allows asynchronous access to the queue without any race
         //conditions or unexpected behaviour.
