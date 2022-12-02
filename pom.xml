@@ -12,6 +12,7 @@
     <modules>
         <module>Networking</module>
         <module>Server</module>
+        <module>Client</module>
     </modules>
 
     <properties>
