@@ -4,6 +4,7 @@ import xyz.benanderson.scs.networking.Packet;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -46,7 +47,7 @@ public class PacketListener implements AutoCloseable {
                     //if the packet was successfully read from the connection,
                     //run callbacks associated with the packet
                     runCallbacks(packet);
-                } catch (EOFException disconnected) {
+                } catch (EOFException | SocketException disconnected) {
                     break;
                 } catch (IOException e) {
                     //exception will be thrown if the connection was closed, in which
