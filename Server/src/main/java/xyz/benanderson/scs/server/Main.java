@@ -14,12 +14,17 @@ import java.net.InetAddress;
 public class Main {
 
     public static void main(String[] args) throws IOException {
+        //create basic ServerBuilder without any additional configuration
         ServerBuilder serverBuilder = new ServerBuilder(ConfigurationWrapper.getInstance().getServerPort(),
                 InetAddress.getByName(ConfigurationWrapper.getInstance().getServerAddress()));
+        //build server and open camera
         try (Server server = serverBuilder.build();
              CameraViewer cameraViewer = new CameraViewer(Webcam.getDefault())) {
             while (true) {
+                //attempt to capture camera image
                 cameraViewer.captureImage().ifPresent(img -> {
+                    //if successful in capturing an image, create a packet from the image
+                    //and send it to all active connections
                     Packet packet = new MediaPacket(img);
                     server.getConnections().values().forEach(conn -> {
                         conn.getPacketSender().sendPacket(packet);
