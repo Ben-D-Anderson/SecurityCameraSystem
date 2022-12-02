@@ -52,6 +52,10 @@ public class ConfigurationWrapper {
         return Paths.get(configuration.getRequiredString("video.save-directory"));
     }
 
+    public Path getUsersSaveDirectory() {
+        return Paths.get(configuration.getRequiredString("users.save-directory"));
+    }
+
     /**
      * @return {@code Duration} denoting preferred length of recorded videos
      */

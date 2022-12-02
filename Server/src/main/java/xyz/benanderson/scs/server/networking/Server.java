@@ -1,6 +1,5 @@
 package xyz.benanderson.scs.server.networking;
 
-import lombok.Getter;
 import xyz.benanderson.scs.networking.connection.Connection;
 import xyz.benanderson.scs.server.configuration.ConfigurationWrapper;
 
@@ -21,7 +20,6 @@ public class Server implements AutoCloseable {
     //attributes of the server
     private final ServerSocket serverSocket;
     private final Thread receiveConnectionsThread;
-    private final int port;
     private final SortedMap<UUID, Connection> connections;
     private final AtomicBoolean running;
     private final BiConsumer<Connection, Server> clientConnectListener;
@@ -44,7 +42,7 @@ public class Server implements AutoCloseable {
         //mark the server as running
         this.running = new AtomicBoolean(true);
         //assign attributes from serverBuilder...
-        this.port = serverBuilder.getPort();
+        int port = serverBuilder.getPort();
         InetAddress bindAddress = serverBuilder.getBindAddress();
         this.clientConnectListener = serverBuilder.getClientConnectListener();
         //append code to remove the Connection from the Server's internal connections map
@@ -55,7 +53,7 @@ public class Server implements AutoCloseable {
         this.clientDisconnectListener = serverBuilder.getClientDisconnectListener().andThen(closeListener);
         this.serverShutdownListener = serverBuilder.getServerShutdownListener();
 
-        this.serverSocket = new ServerSocket(this.port, 5, bindAddress);
+        this.serverSocket = new ServerSocket(port, 5, bindAddress);
         this.receiveConnectionsThread = new Thread(this::receiveConnections);
         this.receiveConnectionsThread.start();
     }
