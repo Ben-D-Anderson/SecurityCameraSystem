@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>scs_server</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>xyz.benanderson</groupId>
             <artifactId>scs_networking</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.github.sarxos</groupId>
