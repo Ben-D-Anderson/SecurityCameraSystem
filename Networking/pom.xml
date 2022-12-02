@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>scs_networking</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.4</version>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
