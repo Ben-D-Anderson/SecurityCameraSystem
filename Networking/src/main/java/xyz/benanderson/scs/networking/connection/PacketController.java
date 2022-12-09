@@ -105,8 +105,10 @@ class PacketController implements AutoCloseable {
     public void close() throws IOException {
         //close object input & output streams - will also close the underlying
         //abstract InputStream & OutputStream on the Socket.
-        objectInputStream.close();
-        objectOutputStream.close();
+        try {
+            objectInputStream.close();
+            objectOutputStream.close();
+        } catch (Exception ignored) {}
     }
 
 }

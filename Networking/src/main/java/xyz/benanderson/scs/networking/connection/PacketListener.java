@@ -122,7 +122,7 @@ public class PacketListener implements AutoCloseable {
         //in the packet listening thread
         this.listeningForPackets.set(false);
         //wait for the packet listening thread to die
-        this.packetListeningThread.join();
+//        this.packetListeningThread.join();
     }
 
 }
