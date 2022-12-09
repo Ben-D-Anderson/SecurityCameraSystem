@@ -2,6 +2,7 @@ package xyz.benanderson.scs.server.account;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import xyz.benanderson.scs.networking.packets.LoginPacket;
 
 @Data
 @EqualsAndHashCode
@@ -15,7 +16,7 @@ public class User {
     }
 
     public static User fromPlainTextPassword(String username, String plainTextPassword, boolean admin) {
-        return new User(username, UserManager.hashPassword(plainTextPassword), admin);
+        return new User(username, LoginPacket.hashPassword(plainTextPassword), admin);
     }
 
     private User(String username, String hashedPassword, boolean admin) {
