@@ -15,7 +15,7 @@ public class MultiFileUserManager implements UserManager {
     @Override
     public Optional<User> getUser(String username) {
         Path userSaveFile = ConfigurationWrapper.getInstance().getUsersSaveDirectory()
-                .resolve(username);
+                .resolve(username.toLowerCase());
         if (!Files.exists(userSaveFile)) {
             return Optional.empty();
         }
@@ -36,7 +36,7 @@ public class MultiFileUserManager implements UserManager {
         Path usersSaveDirectory = ConfigurationWrapper.getInstance().getUsersSaveDirectory();
         Files.createDirectories(usersSaveDirectory);
         //creates and writes user data to file (automatically closes it)
-        Path userSaveFile = usersSaveDirectory.resolve(user.getUsername());
+        Path userSaveFile = usersSaveDirectory.resolve(user.getUsername().toLowerCase());
         Files.writeString(userSaveFile, user.getUsername() + System.lineSeparator()
                 + user.getHashedPassword() + System.lineSeparator()
                 + user.isAdmin());
@@ -45,7 +45,7 @@ public class MultiFileUserManager implements UserManager {
     @Override
     public void deleteUser(String username) throws IOException {
         Path userSaveFile = ConfigurationWrapper.getInstance().getUsersSaveDirectory()
-                .resolve(username);
+                .resolve(username.toLowerCase());
         Files.deleteIfExists(userSaveFile);
     }
 
