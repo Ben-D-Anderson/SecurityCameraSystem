@@ -21,7 +21,10 @@ public class MultiFileUserManager implements UserManager {
         }
         try {
             List<String> lines = Files.readAllLines(userSaveFile);
-            return Optional.of(new User(lines.get(0), lines.get(1), Boolean.parseBoolean(lines.get(2))));
+            User parsedUser = User.fromHashedPassword(lines.get(0),
+                    lines.get(1),
+                    Boolean.parseBoolean(lines.get(2)));
+            return Optional.of(parsedUser);
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -35,14 +38,14 @@ public class MultiFileUserManager implements UserManager {
         //creates and writes user data to file (automatically closes it)
         Path userSaveFile = usersSaveDirectory.resolve(user.getUsername());
         Files.writeString(userSaveFile, user.getUsername() + System.lineSeparator()
-                + user.getPassword() + System.lineSeparator()
+                + user.getHashedPassword() + System.lineSeparator()
                 + user.isAdmin());
     }
 
     @Override
-    public void deleteUser(User user) throws IOException {
+    public void deleteUser(String username) throws IOException {
         Path userSaveFile = ConfigurationWrapper.getInstance().getUsersSaveDirectory()
-                .resolve(user.getUsername());
+                .resolve(username);
         Files.deleteIfExists(userSaveFile);
     }
 
