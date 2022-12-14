@@ -38,7 +38,7 @@ public class ServerLoginTest {
     public void testIncorrectPassword() throws UnknownHostException {
         CompletableFuture<String> result = new CompletableFuture<>();
         ServerBuilder serverBuilder = new ServerBuilder(0, InetAddress.getLocalHost());
-        Main.configureServerBuilder(serverBuilder, mockUserManager());
+        Main.addAuthenticationToServerBuilder(serverBuilder, mockUserManager());
         try (Server server = serverBuilder.build()) {
             Socket socket = new Socket(InetAddress.getLocalHost(), server.getPort());
             Connection connection = new Connection(socket);
@@ -63,7 +63,7 @@ public class ServerLoginTest {
     public void testIncorrectUsername() throws UnknownHostException {
         CompletableFuture<String> result = new CompletableFuture<>();
         ServerBuilder serverBuilder = new ServerBuilder(0, InetAddress.getLocalHost());
-        Main.configureServerBuilder(serverBuilder, mockUserManager());
+        Main.addAuthenticationToServerBuilder(serverBuilder, mockUserManager());
         try (Server server = serverBuilder.build()) {
             Socket socket = new Socket(InetAddress.getLocalHost(), server.getPort());
             Connection connection = new Connection(socket);
@@ -88,7 +88,7 @@ public class ServerLoginTest {
     public void testSuccessfulLogin() throws UnknownHostException {
         CompletableFuture<String> result = new CompletableFuture<>();
         ServerBuilder serverBuilder = new ServerBuilder(0, InetAddress.getLocalHost());
-        Main.configureServerBuilder(serverBuilder, mockUserManager());
+        Main.addAuthenticationToServerBuilder(serverBuilder, mockUserManager());
         try (Server server = serverBuilder.build()) {
             Socket socket = new Socket(InetAddress.getLocalHost(), server.getPort());
             Connection connection = new Connection(socket);

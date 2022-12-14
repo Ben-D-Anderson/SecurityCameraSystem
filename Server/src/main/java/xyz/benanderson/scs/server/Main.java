@@ -24,7 +24,7 @@ public class Main {
         ServerBuilder serverBuilder = new ServerBuilder(ConfigurationWrapper.getInstance().getServerPort(),
                 InetAddress.getByName(ConfigurationWrapper.getInstance().getServerAddress()));
         UserManager userManager = new MultiFileUserManager();
-        configureServerBuilder(serverBuilder, userManager);
+        addAuthenticationToServerBuilder(serverBuilder, userManager);
 
         //todo demo test then remove / or ship with preset creds / or allow set creds in config
         try {
@@ -37,6 +37,7 @@ public class Main {
         //build server and open camera
         try (Server server = serverBuilder.build();
              CameraViewer cameraViewer = new CameraViewer(Webcam.getDefault())) {
+            System.out.println("[INFO] Server Started Successfully");
             while (true) {
                 //attempt to capture camera image
                 cameraViewer.captureImage().ifPresent(img -> {
@@ -56,7 +57,7 @@ public class Main {
 
     private final static Set<UUID> loggedInUsers = Collections.synchronizedSet(new HashSet<>());
 
-    static void configureServerBuilder(ServerBuilder serverBuilder, UserManager userManager) {
+    static void addAuthenticationToServerBuilder(ServerBuilder serverBuilder, UserManager userManager) {
         //add `LoginPacket` listener on connect
         serverBuilder.onClientConnect((connection, server) -> {
             connection.getPacketListener().addCallback(LoginPacket.class, loginPacket -> {
