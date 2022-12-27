@@ -8,43 +8,57 @@ import xyz.benanderson.scs.networking.packets.MediaPacket;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.net.Socket;
 
 public class Main {
 
     private static ClientGUI clientGUI;
+    private static Connection connection;
 
     public static void main(String[] args) throws Exception {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-        JFrame f = new JFrame();
-        f.setVisible(true);
-        f.setSize(1280, 800);
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setLocationRelativeTo(null);
+        JFrame frame = new JFrame();
+        frame.setVisible(true);
+        frame.setTitle("Security Camera Client");
+        frame.setSize(1280, 800);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
 
         clientGUI = new ClientGUI();
         clientGUI.getSettingsButton().setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
         clientGUI.getSettingsButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         clientGUI.getConnectButton().setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
         clientGUI.getConnectButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        clientGUI.getConnectButton().addActionListener(event -> new ConnectionDialog());
 
-        f.setContentPane(clientGUI.getContentPane());
+        frame.setContentPane(clientGUI.getContentPane());
+    }
 
-        Socket socket = new Socket("127.0.0.1", 8192);
-        Connection connection = new Connection(socket);
+    public static void attemptConnect(String address, int port, String username, String password) throws IOException {
+        if (connection != null && connection.isConnected()) {
+            try {
+                connection.close();
+            } catch (Exception ignored) {}
+        }
+
+        Socket socket = new Socket(address, port);
+        connection = new Connection(socket);
         connection.getPacketListener().addCallback(MediaPacket.class, mediaPacket -> {
-            clientGUI.getVideoComponent().setIcon(new ImageIcon(mediaPacket.getMediaFrame()));
+            EventQueue.invokeLater(() -> clientGUI.getVideoComponent()
+                    .setIcon(new ImageIcon(mediaPacket.getMediaFrame())));
         });
         connection.getPacketListener().addCallback(InfoPacket.class, infoPacket -> {
-            System.out.println("[INFO] " + infoPacket.getInfo());
+            JOptionPane.showMessageDialog(clientGUI.getContentPane(), infoPacket.getInfo(),
+                    "Information", JOptionPane.INFORMATION_MESSAGE);
         });
         connection.getPacketListener().addCallback(DisconnectPacket.class, disconnectPacket -> {
-            System.out.println("[DISCONNECTED] Reason: " + disconnectPacket.getReason());
-            f.dispose();
+            JOptionPane.showMessageDialog(clientGUI.getContentPane(),
+                    "Disconnected From Camera." + System.lineSeparator() + "Reason: " + disconnectPacket.getReason(),
+                    "Disconnected", JOptionPane.WARNING_MESSAGE);
         });
-        Thread.sleep(5000);
-        LoginPacket loginPacket = LoginPacket.fromPlainTextPassword("testUsername", "testPassword");
+        LoginPacket loginPacket = LoginPacket.fromPlainTextPassword(username, password);
         connection.getPacketSender().sendPacket(loginPacket);
     }
 
