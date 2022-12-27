@@ -1,5 +1,7 @@
 package xyz.benanderson.scs.server.configuration;
 
+import xyz.benanderson.scs.networking.Validation;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -35,7 +37,12 @@ public class ConfigurationWrapper {
      * @return TCP port for the server to run on, or 0 if no port was specified in the config
      */
     public int getServerPort() {
-        return configuration.getInt("server.port").orElse(0);
+        try {
+            return Validation.parsePort(configuration.getInt("server.port").orElse(0));
+        } catch (Validation.ValidationException e) {
+            System.err.println("[WARNING] " + e.getMessage() + ". Resorting to random port number.");
+            return 0;
+        }
     }
 
     /**
