@@ -23,7 +23,6 @@ public class ConnectionDialog extends JDialog {
     public ConnectionDialog() {
         setContentPane(contentPane);
         setModal(true);
-        setLocationRelativeTo(null);
         getRootPane().setDefaultButton(buttonConnect);
         buttonConnect.addActionListener(e -> onClickConnect());
         buttonCancel.addActionListener(e -> onClickCancel());
@@ -41,6 +40,7 @@ public class ConnectionDialog extends JDialog {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         pack();
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 

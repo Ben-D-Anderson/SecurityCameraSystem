@@ -50,13 +50,13 @@ public class Main {
                     .setIcon(new ImageIcon(mediaPacket.getMediaFrame())));
         });
         connection.getPacketListener().addCallback(InfoPacket.class, infoPacket -> {
-            JOptionPane.showMessageDialog(clientGUI.getContentPane(), infoPacket.getInfo(),
-                    "Information", JOptionPane.INFORMATION_MESSAGE);
+            EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(clientGUI.getContentPane(), infoPacket.getInfo(),
+                    "Information", JOptionPane.INFORMATION_MESSAGE));
         });
         connection.getPacketListener().addCallback(DisconnectPacket.class, disconnectPacket -> {
-            JOptionPane.showMessageDialog(clientGUI.getContentPane(),
+            EventQueue.invokeLater(() -> JOptionPane.showMessageDialog(clientGUI.getContentPane(),
                     "Disconnected From Camera." + System.lineSeparator() + "Reason: " + disconnectPacket.getReason(),
-                    "Disconnected", JOptionPane.WARNING_MESSAGE);
+                    "Disconnected", JOptionPane.WARNING_MESSAGE));
         });
         LoginPacket loginPacket = LoginPacket.fromPlainTextPassword(username, password);
         connection.getPacketSender().sendPacket(loginPacket);
