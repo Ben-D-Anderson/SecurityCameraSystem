@@ -27,8 +27,6 @@ public class Main {
         frame.setLocationRelativeTo(null);
 
         clientGUI = new ClientGUI();
-        clientGUI.getSettingsButton().setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
-        clientGUI.getSettingsButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         clientGUI.getConnectButton().setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
         clientGUI.getConnectButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         clientGUI.getConnectButton().addActionListener(event -> new ConnectionDialog());

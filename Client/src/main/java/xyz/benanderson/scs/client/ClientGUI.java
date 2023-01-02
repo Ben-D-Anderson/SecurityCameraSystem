@@ -13,8 +13,6 @@ public class ClientGUI {
     @Getter
     private JPanel cameraPane;
     @Getter
-    private JButton settingsButton;
-    @Getter
     private JButton connectButton;
     @Getter
     private JLabel videoComponent;
@@ -48,41 +46,25 @@ public class ClientGUI {
         gbc.gridy = 1;
         gbc.weighty = 1.0;
         panel1.add(connectButton, gbc);
-        settingsButton = new JButton();
-        settingsButton.setFocusPainted(false);
-        settingsButton.setPreferredSize(new Dimension(200, 50));
-        settingsButton.setText("Settings");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 3;
-        gbc.gridy = 1;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel1.add(settingsButton, gbc);
         final JPanel spacer2 = new JPanel();
         gbc = new GridBagConstraints();
-        gbc.gridx = 4;
+        gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panel1.add(spacer2, gbc);
         final JPanel spacer3 = new JPanel();
         gbc = new GridBagConstraints();
-        gbc.gridx = 0;
+        gbc.gridx = 2;
         gbc.gridy = 1;
+        gbc.weightx = 0.3;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panel1.add(spacer3, gbc);
         final JPanel spacer4 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
-        gbc.gridy = 1;
-        gbc.weightx = 0.3;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel1.add(spacer4, gbc);
-        final JPanel spacer5 = new JPanel();
-        gbc = new GridBagConstraints();
-        gbc.gridx = 2;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.VERTICAL;
-        panel1.add(spacer5, gbc);
+        panel1.add(spacer4, gbc);
         cameraPane = new JPanel();
         cameraPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(cameraPane, BorderLayout.CENTER);
