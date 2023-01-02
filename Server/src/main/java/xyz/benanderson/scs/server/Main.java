@@ -26,10 +26,8 @@ public class Main {
         UserManager userManager = new MultiFileUserManager();
         addAuthenticationToServerBuilder(serverBuilder, userManager);
 
-        //todo demo test then remove / or ship with preset creds / or allow set creds in config
         try {
-            userManager.createUser(User.fromPlainTextPassword("testUsername",
-                    LoginPacket.hashPassword("testPassword"), false));
+            userManager.createUser(ConfigurationWrapper.getInstance().getDefaultUser());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,8 @@
 package xyz.benanderson.scs.server.configuration;
 
 import xyz.benanderson.scs.networking.Validation;
+import xyz.benanderson.scs.networking.packets.LoginPacket;
+import xyz.benanderson.scs.server.account.User;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,6 +73,12 @@ public class ConfigurationWrapper {
         TemporalUnit durationUnit = ChronoUnit.valueOf(configuration.getString("video.duration.unit")
                 .orElse("minutes").toUpperCase());
         return Duration.of(durationNumber, durationUnit);
+    }
+
+    public User getDefaultUser() {
+        return User.fromPlainTextPassword(configuration.getRequiredString("users.default.username"),
+                LoginPacket.hashPassword(configuration.getRequiredString("users.default.password")),
+                configuration.getBoolean("users.default.is_admin", false));
     }
 
 }
