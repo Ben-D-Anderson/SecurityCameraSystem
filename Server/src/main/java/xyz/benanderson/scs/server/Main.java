@@ -35,6 +35,16 @@ public class Main {
         }
 
         //build server and open camera
+        try {
+            if (Webcam.getDefault() == null) {
+                System.err.println("[ERROR] No Camera Detected");
+                System.exit(1);
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] Error Occurred Accessing Camera");
+            e.printStackTrace();
+            System.exit(1);
+        }
         try (Server server = serverBuilder.build();
              CameraViewer cameraViewer = new CameraViewer(Webcam.getDefault())) {
             System.out.println("[INFO] Server Started Successfully");
