@@ -12,6 +12,7 @@ import java.util.Optional;
 
 public class VideoFileManager {
 
+    @Getter
     private final Path saveDirectory;
     @Getter
     private final Duration videoDuration;
@@ -26,7 +27,8 @@ public class VideoFileManager {
 
     private void nextSaveFile() {
         LocalDateTime currentDateTime = LocalDateTime.now();
-        currentSaveFile = saveDirectory.resolve(currentDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        //"crms" stands for camera raw media save
+        currentSaveFile = saveDirectory.resolve(currentDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + ".crms");
         try {
             Files.createFile(currentSaveFile);
         } catch (IOException e) {
