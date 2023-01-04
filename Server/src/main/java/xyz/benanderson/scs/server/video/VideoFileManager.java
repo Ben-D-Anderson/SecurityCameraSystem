@@ -26,6 +26,14 @@ public class VideoFileManager {
     }
 
     private void nextSaveFile() {
+        if (!Files.exists(saveDirectory)) {
+            try {
+                Files.createDirectories(saveDirectory);
+            } catch (IOException e) {
+                System.err.println("[ERROR] Failed to create videos directory.");
+                e.printStackTrace();
+            }
+        }
         LocalDateTime currentDateTime = LocalDateTime.now();
         //"crms" stands for camera raw media save
         currentSaveFile = saveDirectory.resolve(currentDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + ".crms");
