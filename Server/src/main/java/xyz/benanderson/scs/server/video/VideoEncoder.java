@@ -3,16 +3,17 @@ package xyz.benanderson.scs.server.video;
 import lombok.AllArgsConstructor;
 import org.jcodec.api.awt.AWTSequenceEncoder;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
+import javax.imageio.*;
 import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
+import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.OutputStream;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -50,22 +51,16 @@ public class VideoEncoder {
             //write the time of the last media frame
             randomAccessFile.seek(16);
             randomAccessFile.writeLong(currentTimeMillis);
+            randomAccessFile.seek(randomAccessFile.length());
+            //write compressed media frame
+            randomAccessFile.write(compressImage(image));
         } catch (Exception e) {
             //output error if one is encountered
             System.err.println("[ERROR] An error occurred when writing timestamp metadata to a save file.");
             e.printStackTrace();
         }
-        //append the latest media frame to the file serialized as bytes
-        try (OutputStream outputStream = Files.newOutputStream(currentSaveFile, StandardOpenOption.APPEND)) {
-            ImageIO.write(image, "jpg", outputStream);
-        } catch (Exception e) {
-            //output error if one is encountered
-            System.err.println("[ERROR] An error occurred when writing a media frame to a save file.");
-            e.printStackTrace();
-        }
     }
 
-    //todo make job that runs and calls this method on any raw media saves found
     public void processRawMediaSave(Path rawMediaSaveFile) {
         //open file using `RandomAccessFile` to be able to skip around in the file
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(rawMediaSaveFile.toFile(), "r");
@@ -86,13 +81,20 @@ public class VideoEncoder {
             //setup video encoding
             File videoOutputFile = new File(rawMediaSaveFile.toString().replace(".crms", ".mp4"));
             AWTSequenceEncoder encoder = AWTSequenceEncoder.createSequenceEncoder(videoOutputFile, fps);
-
             //read frames from the raw media save file and encode them into the output file
             for (int frameNumber = 0; frameNumber < numberOfFrames; frameNumber++) {
-                BufferedImage image = reader.read(frameNumber);
+                BufferedImage image;
+                try {
+                    image = reader.read(frameNumber);
+                } catch (IndexOutOfBoundsException e) {
+                    break;
+                }
                 encoder.encodeImage(image);
             }
             encoder.finish();
+            System.out.println("[INFO] Finished encoding video " + videoOutputFile.getName());
+            //delete raw media save file after video constructed from it
+            Files.delete(rawMediaSaveFile);
         } catch (Exception e) {
             //output error if encountered
             System.err.println("[ERROR] An error occurred when encoding a video from a raw media save file.");
@@ -100,5 +102,24 @@ public class VideoEncoder {
         }
     }
 
+    public byte[] compressImage(BufferedImage bufferedImage) {
+        ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+        try (ImageOutputStream outputStream = new MemoryCacheImageOutputStream(compressed)) {
+            ImageWriter jpgWriter = ImageIO.getImageWritersByFormatName("jpg").next();
+
+            // Configure JPEG compression: 20% quality
+            ImageWriteParam jpgWriteParam = jpgWriter.getDefaultWriteParam();
+            jpgWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            jpgWriteParam.setCompressionQuality(0.2f);
+
+            jpgWriter.setOutput(outputStream);
+            jpgWriter.write(null, new IIOImage(bufferedImage, null, null), jpgWriteParam);
+            jpgWriter.dispose();
+        } catch (IOException e) {
+            System.err.println("[ERROR] An error occurred when compressing a media frame for a raw media save file.");
+            e.printStackTrace();
+        }
+        return compressed.toByteArray();
+    }
 
 }
