@@ -13,10 +13,19 @@ import xyz.benanderson.scs.server.configuration.ConfigurationWrapper;
 import xyz.benanderson.scs.server.networking.Server;
 import xyz.benanderson.scs.server.networking.ServerBuilder;
 import xyz.benanderson.scs.server.video.CameraViewer;
+import xyz.benanderson.scs.server.video.VideoEncoder;
+import xyz.benanderson.scs.server.video.VideoFileManager;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -43,12 +52,21 @@ public class Main {
             e.printStackTrace();
             System.exit(1);
         }
+        //setup server components
+        ImageIO.setUseCache(false);
         try (Server server = serverBuilder.build();
              CameraViewer cameraViewer = new CameraViewer(Webcam.getDefault())) {
+            VideoFileManager videoFileManager = new VideoFileManager(
+                    ConfigurationWrapper.getInstance().getVideoSaveDirectory(),
+                    ConfigurationWrapper.getInstance().getVideoDuration()
+            );
+            VideoEncoder videoEncoder = new VideoEncoder(videoFileManager);
+            startVideoEncodingScheduledJob(videoFileManager, videoEncoder);
             System.out.println("[INFO] Server Started Successfully");
             while (true) {
                 //attempt to capture camera image
                 cameraViewer.captureImage().ifPresent(img -> {
+                    videoEncoder.appendToStream(img, System.currentTimeMillis());
                     //if successful in capturing an image, create a packet from the image
                     //and send it to all active connections
                     Packet packet = new MediaPacket(img);
@@ -61,6 +79,31 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    private final static Set<Path> videosBeingEncoded = Collections.synchronizedSet(new HashSet<>());
+
+    private static void startVideoEncodingScheduledJob(VideoFileManager videoFileManager, VideoEncoder videoEncoder) {
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
+            Optional<Path> currentSaveFile = videoFileManager.getCurrentSaveFile();
+            if (currentSaveFile.isEmpty()) {
+                System.err.println("[ERROR] An error occurred when accessing the current save file.");
+                return;
+            }
+            try (Stream<Path> pathStream = Files.list(videoFileManager.getSaveDirectory())) {
+                pathStream.filter(path -> path.toString().endsWith(".crms"))
+                        .filter(path -> !path.equals(currentSaveFile.get()))
+                        .filter(path -> !videosBeingEncoded.contains(path))
+                        .forEach(path -> {
+                            videosBeingEncoded.add(path);
+                            videoEncoder.processRawMediaSave(path);
+                        });
+            } catch (IOException e) {
+                System.err.println("[ERROR] An error occurred when searching for raw media save files to encode into videos.");
+            }
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
     private final static Set<UUID> loggedInUsers = Collections.synchronizedSet(new HashSet<>());
@@ -98,6 +141,7 @@ public class Main {
                 //login successful
                 loggedInUsers.add(connection.getId());
                 connection.getPacketSender().sendPacket(new InfoPacket("Correct Credentials"));
+                System.out.println("[INFO] User '" + loginPacket.getUsername() + "' logged in successfully.");
             });
         });
         //remove connection from loggedInUsers on disconnect - prevents infinite memory usage
