@@ -34,7 +34,7 @@ public class ConfigurationTest {
         assertEquals(ConfigurationWrapper.getInstance().getServerAddress(), "127.0.0.1");
         assertEquals(ConfigurationWrapper.getInstance().getServerPort(), 8192);
         assertEquals(ConfigurationWrapper.getInstance().getMaxConnections(), 5);
-        assertEquals(ConfigurationWrapper.getInstance().getVideoDuration(), Duration.ofMinutes(30));
+        assertEquals(ConfigurationWrapper.getInstance().getVideoDuration(), Duration.ofMinutes(1));
     }
 
     @AfterEach

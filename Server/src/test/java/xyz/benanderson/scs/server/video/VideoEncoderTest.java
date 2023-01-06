@@ -23,16 +23,16 @@ public class VideoEncoderTest {
         long endTimestamp = startTimestamp + 1000;
         BufferedImage[] testImages = getTestImages();
 
-        //serializing images so that they can be compared to the output
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(testImages[0], "jpg", byteArrayOutputStream);
-        ImageIO.write(testImages[1], "jpg", byteArrayOutputStream);
-
         //running the method to be tested with the test data
         VideoFileManager videoFileManager = new VideoFileManager(tempDir, Duration.ofMinutes(5));
         VideoEncoder videoEncoder = new VideoEncoder(videoFileManager);
         videoEncoder.appendToStream(testImages[0], startTimestamp);
         videoEncoder.appendToStream(testImages[1], endTimestamp);
+
+        //serializing images so that they can be compared to the output
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byteArrayOutputStream.writeBytes(videoEncoder.compressImage(testImages[0]));
+        byteArrayOutputStream.writeBytes(videoEncoder.compressImage(testImages[1]));
 
         Path rawMediaSaveFile = videoFileManager.getCurrentSaveFile().orElseThrow(FileNotFoundException::new);
         //checking that the data outputted by the method being tested is correct
@@ -67,7 +67,6 @@ public class VideoEncoderTest {
             ImageIO.write(testImages[0], "jpg", dataOutputStream);
             ImageIO.write(testImages[1], "jpg", dataOutputStream);
         }
-        System.out.println("Size: " + Files.size(rawMediaSaveFile));
 
         //running the method to be tested
         videoEncoder.processRawMediaSave(rawMediaSaveFile);
