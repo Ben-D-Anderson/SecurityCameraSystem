@@ -3,6 +3,8 @@ package xyz.benanderson.scs.server.configuration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import xyz.benanderson.scs.networking.packets.LoginPacket;
+import xyz.benanderson.scs.server.account.User;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,6 +37,10 @@ public class ConfigurationTest {
         assertEquals(ConfigurationWrapper.getInstance().getServerPort(), 8192);
         assertEquals(ConfigurationWrapper.getInstance().getMaxConnections(), 5);
         assertEquals(ConfigurationWrapper.getInstance().getVideoDuration(), Duration.ofMinutes(1));
+        assertEquals(ConfigurationWrapper.getInstance().getVideoSaveDirectory(), Paths.get("./videos/"));
+        assertEquals(ConfigurationWrapper.getInstance().getUsersSaveDirectory(), Paths.get("./users/"));
+        assertEquals(ConfigurationWrapper.getInstance().getDefaultUser(),
+                User.fromPlainTextPassword("admin", LoginPacket.hashPassword("5J6*9XodH&&mAUBz"), true));
     }
 
     @AfterEach
