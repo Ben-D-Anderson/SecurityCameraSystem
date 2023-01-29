@@ -101,7 +101,11 @@ public class Configuration {
      * @return configuration entry value as an {@code Optional}
      */
     public Optional<Integer> getInt(String key) {
-        return getString(key).map(Integer::parseInt);
+        try {
+            return getString(key).map(Integer::parseInt);
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     /**
