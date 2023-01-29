@@ -71,7 +71,8 @@ public class VideoEncoder {
             long endTimestamp = randomAccessFile.readLong();
             //calculate fps (frames per second) using header metadata
             long videoDurationInMillis = endTimestamp - startTimestamp;
-            int fps = (int) (numberOfFrames / (videoDurationInMillis / 1000));
+            if (videoDurationInMillis == 0) videoDurationInMillis = 1;
+            int fps = (int) (numberOfFrames / (videoDurationInMillis / 1000d));
 
             //setup image (media frame) reading
             fileImageInputStream.seek(24);
