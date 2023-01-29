@@ -40,7 +40,7 @@ public class ConfigurationWrapper {
      */
     public int getServerPort() {
         try {
-            return Validation.parsePort(configuration.getInt("server.port").orElse(0));
+            return Validation.parsePort(configuration.getInt("server.port").orElse(-1));
         } catch (Validation.ValidationException e) {
             System.err.println("[WARNING] " + e.getMessage() + ". Resorting to random port number.");
             return 0;
