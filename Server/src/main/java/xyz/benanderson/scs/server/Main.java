@@ -62,7 +62,7 @@ public class Main {
             );
             VideoEncoder videoEncoder = new VideoEncoder(videoFileManager);
             startVideoEncodingScheduledJob(videoFileManager, videoEncoder);
-            System.out.println("[INFO] Server Started Successfully");
+            System.out.println("[INFO] Server Started Successfully On Port " + server.getPort());
             while (true) {
                 //attempt to capture camera image
                 cameraViewer.captureImage().ifPresent(img -> {
