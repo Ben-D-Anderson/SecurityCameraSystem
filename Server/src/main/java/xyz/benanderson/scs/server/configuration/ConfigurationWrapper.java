@@ -69,9 +69,9 @@ public class ConfigurationWrapper {
      * @return {@code Duration} denoting preferred length of recorded videos
      */
     public Duration getVideoDuration() {
-        int durationNumber = configuration.getInt("video.duration.number").orElse(30);
+        int durationNumber = configuration.getInt("video.duration.number").orElse(60);
         TemporalUnit durationUnit = ChronoUnit.valueOf(configuration.getString("video.duration.unit")
-                .orElse("minutes").toUpperCase());
+                .orElse("seconds").toUpperCase());
         return Duration.of(durationNumber, durationUnit);
     }
 
