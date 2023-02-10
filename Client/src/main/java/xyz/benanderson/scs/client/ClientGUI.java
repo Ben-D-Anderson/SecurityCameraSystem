@@ -66,11 +66,15 @@ public class ClientGUI {
         gbc.fill = GridBagConstraints.VERTICAL;
         panel1.add(spacer4, gbc);
         cameraPane = new JPanel();
-        cameraPane.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        cameraPane.setLayout(new GridLayoutManager(1, 1,
+                new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(cameraPane, BorderLayout.CENTER);
         videoComponent = new JLabel();
         videoComponent.setText("");
-        cameraPane.add(videoComponent, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        cameraPane.add(videoComponent, new GridConstraints(0, 0, 1,
+                1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+                GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED,
+                null, null, null, 0, false));
     }
 
     /**

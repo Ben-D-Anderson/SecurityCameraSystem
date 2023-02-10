@@ -6,7 +6,7 @@
     <parent>
         <artifactId>scs_parent</artifactId>
         <groupId>xyz.benanderson</groupId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
     </parent>
 
     <artifactId>scs_networking</artifactId>
